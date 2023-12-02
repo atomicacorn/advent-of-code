@@ -61,7 +61,7 @@ const getCalibrationValues2 = (pathToFile: string): number[] => {
   try {
     const rawInput = readInFile(path.resolve(__dirname, pathToFile));
     if (rawInput) {
-      rawCalibrationEntries = rawInput.toString().split('\n'); // every calorie entry
+      rawCalibrationEntries = rawInput.toString().split('\n'); // every calibration entry
     }
   } catch (e) {
     console.error(`There was a problem reading the input file for day 1`, e);
@@ -93,9 +93,6 @@ export const part1 = (pathToFile: string): number => {
 // What is the sum of all the calibration values WITH spelled out digits?
 export const part2 = (pathToFile: string): number => {
   const calibrationValues = getCalibrationValues2(pathToFile);
-  // console.log('calibrationValues', calibrationValues);
-  // console.log('calibrationValues', calibrationValues.length);
-  console.dir(calibrationValues, { maxArrayLength: null });
   const sumOfCalibrationDigits = calibrationValues.reduce((acc, current) => {
     return acc + current;
   }, 0);
