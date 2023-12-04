@@ -2,13 +2,7 @@
 import { getPuzzleInput } from 'utils';
 
 const getCardPoints = (timesWon: number): number => {
-  let points;
-  if (timesWon <= 2) {
-    points = timesWon;
-  } else {
-    points = 2 ** (timesWon - 1);
-  }
-  return points;
+  return timesWon ? 2 ** (timesWon - 1) : 0;
 };
 
 const howManyTimesWon = (
