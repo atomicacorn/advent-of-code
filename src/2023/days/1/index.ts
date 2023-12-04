@@ -1,6 +1,5 @@
 // https://adventofcode.com/2023/day/1
-import path from 'path';
-import { readInFile } from 'utils';
+import { getPuzzleInput } from 'utils';
 
 export const numbersAsText = [
   'zero',
@@ -35,16 +34,9 @@ export const extractNumbersAndText = (calibrationValue: string): string[] => {
 };
 
 const getCalibrationValues = (pathToFile: string): number[] => {
-  let rawCalibrationEntries: string[] = [];
+  const rawCalibrationEntries = getPuzzleInput(pathToFile);
   const calibrationDigits: number[] = [];
-  try {
-    const rawInput = readInFile(path.resolve(__dirname, pathToFile));
-    if (rawInput) {
-      rawCalibrationEntries = rawInput.toString().split('\n'); // every calorie entry
-    }
-  } catch (e) {
-    console.error(`There was a problem reading the input file for day 1`, e);
-  }
+
   rawCalibrationEntries.forEach((calibrationEntry) => {
     const numbers = extractNumbers(calibrationEntry);
     const doubleDigit = parseInt(`${numbers[0]}${numbers[numbers.length - 1]}`);
@@ -56,16 +48,9 @@ const getCalibrationValues = (pathToFile: string): number[] => {
 };
 
 const getCalibrationValues2 = (pathToFile: string): number[] => {
-  let rawCalibrationEntries: string[] = [];
+  const rawCalibrationEntries = getPuzzleInput(pathToFile);
   const calibrationDigits: number[] = [];
-  try {
-    const rawInput = readInFile(path.resolve(__dirname, pathToFile));
-    if (rawInput) {
-      rawCalibrationEntries = rawInput.toString().split('\n'); // every calibration entry
-    }
-  } catch (e) {
-    console.error(`There was a problem reading the input file for day 1`, e);
-  }
+
   rawCalibrationEntries.forEach((calibrationEntry) => {
     const numbers = extractNumbersAndText(calibrationEntry).map((number) =>
       convertNumbersFromText(number)

@@ -1,6 +1,5 @@
 // https://adventofcode.com/2023/day/2
-import path from 'path';
-import { readInFile } from 'utils';
+import { getPuzzleInput } from 'utils';
 
 const maxRedCubes = 12;
 const maxGreenCubes = 13;
@@ -44,17 +43,8 @@ const isGamePossible = (gameData: GameResult): boolean => {
 };
 
 const getValidGameIDs = (pathToFile: string): number[] => {
-  let gameData: string[] = [];
+  const gameData: string[] = getPuzzleInput(pathToFile);
   const possibleGameIDs: number[] = [];
-
-  try {
-    const rawInput = readInFile(path.resolve(__dirname, pathToFile));
-    if (rawInput) {
-      gameData = rawInput.toString().split('\n'); // every game ID entry
-    }
-  } catch (e) {
-    console.error(`There was a problem reading the input file for day 2`, e);
-  }
 
   gameData.forEach((gameByID) => {
     if (gameByID) {
@@ -79,22 +69,12 @@ const getValidGameIDs = (pathToFile: string): number[] => {
 };
 
 const getFewestCubesMultiplied = (pathToFile: string): number[] => {
-  let gameData: string[] = [];
+  const gameData: string[] = getPuzzleInput(pathToFile);
   const multipliedFewestCubes: number[] = [];
-
-  try {
-    const rawInput = readInFile(path.resolve(__dirname, pathToFile));
-    if (rawInput) {
-      gameData = rawInput.toString().split('\n'); // every game ID entry
-    }
-  } catch (e) {
-    console.error(`There was a problem reading the input file for day 2`, e);
-  }
 
   gameData.forEach((gameByID) => {
     if (gameByID) {
-      const [gameName, gameResults] = gameByID.split(':'); // ["Game 1", "10 green, 5 blue, 11 red; 5 blue, 6 green"]
-      const gameID = Number(gameName.split(' ')[1]);
+      const [, gameResults] = gameByID.split(':'); // ["Game 1", "10 green, 5 blue, 11 red; 5 blue, 6 green"]
       const games = gameResults.split(';'); // ["10 green, 5 blue, 11 red", " 5 blue, 6 green"]
       const maxCubesInAGame: GameResult = {
         [CubeColors.red]: 0,
