@@ -1,5 +1,5 @@
 import path from 'path';
-import { part1 } from './index';
+import { part1, part2 } from './index';
 
 const pathToFile1 = path.resolve(__dirname, './test1.txt');
 const pathToFile2 = path.resolve(__dirname, './test2.txt');
@@ -14,5 +14,10 @@ describe('Third day solutions using test input', () => {
     expect(part1(pathToFile3)).toBe(550934);
     expect(part1(pathToFile4)).toBe(0);
     expect(part1(pathToFile5)).toBe(10657);
+  });
+
+  it('should be correct for part 2', () => {
+    const result = part2(pathToFile1);
+    expect(result).toBe(467835);
   });
 });

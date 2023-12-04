@@ -3,25 +3,33 @@ import { getPuzzleInput } from 'utils';
 
 const hasAdjacentSymbol = (
   partialEngineMap: string[][],
+  engineRowIndex: number,
   startIndex: number,
   endIndex: number
-): boolean => {
+): [isAdjacentToASymbol: boolean, gearCoordinate: string | null] => {
   let isAdjacentToASymbol = false;
+  let gearCoordinate = null;
+
   const isValidSymbol = new RegExp(/[^.[0-9]]*/); // matches any characters except ".", digits and ignores whitespace chars
 
-  partialEngineMap.forEach((partialEngineMapRow) => {
+  partialEngineMap.forEach((partialEngineMapRow, rowIndex) => {
     for (let i = startIndex - 1; i <= endIndex + 1; i++) {
       // make sure we don't select outside of the engine boundaries
       if (i >= 0 && i <= partialEngineMapRow.length) {
         const anAdjacentSquare = partialEngineMapRow[i];
         if (anAdjacentSquare && isValidSymbol.test(anAdjacentSquare)) {
+          if (partialEngineMap.length === 2 && rowIndex === 1) {
+            gearCoordinate = `${engineRowIndex + rowIndex},${i}`;
+          } else {
+            gearCoordinate = `${engineRowIndex + rowIndex - 1},${i}`;
+          }
           isAdjacentToASymbol = true;
           break;
         }
       }
     }
   });
-  return isAdjacentToASymbol;
+  return [isAdjacentToASymbol, gearCoordinate];
 };
 
 const getEnginePartEndIndex = (
@@ -45,9 +53,13 @@ const getEnginePartEndIndex = (
   return [endIndex, Number(fullNumber)];
 };
 
-const getValidEngineParts = (pathToFile: string): number[] => {
+const getValidEngineParts = (
+  pathToFile: string
+): [number[], Map<string, number[]>] => {
   const engineData: string[] = getPuzzleInput(pathToFile);
   const validEngineParts: number[] = [];
+
+  const engineToGearCoordinateMap: Map<string, number[]> = new Map();
 
   const engineMap = engineData.map(
     (engineDataLine) => engineDataLine && engineDataLine.split('')
@@ -113,12 +125,29 @@ const getValidEngineParts = (pathToFile: string): number[] => {
       }
 
       if (startIndex !== null && endIndex !== null && fullNumber !== null) {
-        const isValid = hasAdjacentSymbol(
+        const [isValid, gearCoordinate] = hasAdjacentSymbol(
           partialEngineMap,
+          engineRowIndex,
           startIndex,
           endIndex
         );
-        isValid && validEngineParts.push(fullNumber);
+        if (isValid && gearCoordinate) {
+          // part1
+          validEngineParts.push(fullNumber);
+          // part2
+          const existingCoordValues =
+            engineToGearCoordinateMap.get(gearCoordinate);
+          if (existingCoordValues && existingCoordValues.length > 0) {
+            // add to the existing key
+            engineToGearCoordinateMap.set(gearCoordinate, [
+              ...existingCoordValues,
+              fullNumber,
+            ]);
+          } else {
+            // add new key
+            engineToGearCoordinateMap.set(gearCoordinate, [fullNumber]);
+          }
+        }
 
         i = endIndex;
         endIndex = null;
@@ -128,13 +157,13 @@ const getValidEngineParts = (pathToFile: string): number[] => {
     }
   });
 
-  return validEngineParts;
+  return [validEngineParts, engineToGearCoordinateMap];
 };
 
-// any number adjacent to a symbol, even diagonally, is a "part number" and should be included in your sum. (Periods (.) do not count as a symbol.)
+// Any number adjacent to a symbol, even diagonally, is a "part number" and should be included in your sum. (Periods (.) do not count as a symbol.)
 // What is the sum of all of the part numbers in the engine schematic?
 export const part1 = (pathToFile: string): number => {
-  const engineParts = getValidEngineParts(pathToFile);
+  const [engineParts] = getValidEngineParts(pathToFile);
   const sumOfEngineParts = engineParts.reduce((acc, current) => {
     return acc + current;
   }, 0);
@@ -142,9 +171,30 @@ export const part1 = (pathToFile: string): number => {
   return sumOfEngineParts;
 };
 
+// A gear is any * symbol that is adjacent to exactly two part numbers.
+// Its gear ratio is the result of multiplying those two numbers together.
+// What is the sum of all of the gear ratios in your engine schematic?
+export const part2 = (pathToFile: string): number => {
+  const [, gearCoordinatesMap] = getValidEngineParts(pathToFile);
+  let sumOfEngineParts = 0;
+  for (const gearCoordinatesMapElement of gearCoordinatesMap.values()) {
+    if (gearCoordinatesMapElement.length === 2) {
+      sumOfEngineParts += gearCoordinatesMapElement.reduce((acc, current) => {
+        return acc * current;
+      }, 1);
+    }
+  }
+  console.log(
+    'The sum of the gear ratios with 2 engine parts adjacent is',
+    sumOfEngineParts
+  );
+  return sumOfEngineParts;
+};
+
 const run = (pathToFile: string) => {
   console.log('Day 3:');
   part1(pathToFile);
+  part2(pathToFile);
 };
 
 export default run;
