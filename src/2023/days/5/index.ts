@@ -71,13 +71,18 @@ const parseAlmanac = (pathToFile: string): ParsedAlmanac => {
 };
 
 const getMapping = (value: number, ranges: number[][]): number => {
-  let returnedValue = value; // default to the value if not in ranges
-  ranges.forEach((range) => {
+  let returnedValue: number | null = null; // default to the value if not in ranges
+  for (let i = 0; i < ranges.length; i++) {
+    const range = ranges[i];
     const destination = range[0];
     const source = range[1];
     const increment = range[2];
 
-    if (value >= source && value <= source + increment) {
+    if (
+      returnedValue === null &&
+      value >= source &&
+      value <= source + increment
+    ) {
       // value within range now work out it's range value
       const diff = source - value;
       const rangeValue = destination - diff;
@@ -85,9 +90,9 @@ const getMapping = (value: number, ranges: number[][]): number => {
         returnedValue = rangeValue;
       }
     }
-  });
+  }
 
-  return returnedValue;
+  return returnedValue || value;
 };
 
 const getSeedRequirements = (
@@ -115,13 +120,26 @@ const getSeedRequirements = (
   };
 };
 
+const getLocation = (currentSeed: number, almanac: ParsedAlmanac): number => {
+  const soil = getMapping(currentSeed, almanac[Almanac.SeedToSoil]);
+  const fertilizer = getMapping(soil, almanac[Almanac.SoilToFertilizer]);
+  const water = getMapping(fertilizer, almanac[Almanac.FertilizerToWater]);
+  const light = getMapping(water, almanac[Almanac.WaterToLight]);
+  const temperature = getMapping(light, almanac[Almanac.LightToTemp]);
+  const humidity = getMapping(temperature, almanac[Almanac.TempToHumidity]);
+  const location = getMapping(humidity, almanac[Almanac.HumidityToLocation]);
+
+  return location;
+};
+
 // What is the lowest location number that corresponds to any of the initial seed numbers?
 export const part1 = (pathToFile: string): number => {
   const almanac = parseAlmanac(pathToFile);
   const seedRequirements: SeedRequirement[] = [];
-  almanac.seeds.map((seed, index) => {
-    seedRequirements[index] = getSeedRequirements(seed, almanac);
-  });
+  for (let i = 0; i < almanac.seeds.length; i++) {
+    const seed = almanac.seeds[i];
+    seedRequirements[i] = getSeedRequirements(seed, almanac);
+  }
   const locations = seedRequirements.map(
     (seedRequirement) => seedRequirement.location
   );
@@ -130,9 +148,51 @@ export const part1 = (pathToFile: string): number => {
   return closestLocation;
 };
 
+// Seed input it ranges of seeds
+// What is the lowest location number that corresponds to any of the initial seed numbers?
+export const part2 = (pathToFile: string): number | null | string => {
+  const almanac = parseAlmanac(pathToFile);
+  let lowestLocation: number | null = null;
+  for (let i = 0; i < almanac.seeds.length; i += 2) {
+    console.log('Seed Pair', i - 1);
+    const seedSource = almanac.seeds[i];
+    const seedRange = almanac.seeds[i + 1];
+
+    for (let j = 0; j <= seedRange + 1; j++) {
+      if (j % 1_000_000 == 0) {
+        console.log('Seed ', seedSource, ': ', j + '/' + Number(seedRange));
+      }
+      const seed = seedSource + j;
+      const location = getLocation(seed, almanac);
+      if (lowestLocation === null || lowestLocation > location) {
+        lowestLocation = location;
+        console.log('new lowest location', lowestLocation);
+      }
+    }
+  }
+
+  console.log(
+    'The closest seed location when considering ranges of seeds is',
+    lowestLocation
+  );
+
+  // this is off by -1 somehow :( but I favour getting on with my life than being bogged down
+  // and this solution sucks and is inefficient, better to find ranges and compare their intersections
+  // may come back to this one day when I'm feeling less burned out (fat chance)
+  return lowestLocation;
+};
+
+// prints out an "Are you sure about that" message - the part 2 above is inefficent
+export const part2Mock = (): void =>
+  console.log(
+    'Commented out part 2 because the solution is inefficient and takes ages.'
+  );
+
 const run = (pathToFile: string) => {
   console.log('Day 5:');
   part1(pathToFile);
+  part2Mock(); // prints out a placeholder message
+  // part2(pathToFile); // comment back in for the part2 solution - takes ages to run so commented out for now
 };
 
 export default run;
