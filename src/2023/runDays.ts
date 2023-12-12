@@ -14,6 +14,7 @@ const runAll = () => {
   advent2022.day4(getInput('4'));
   advent2022.day5(getInput('5'));
   advent2022.day6(getInput('6'));
+  advent2022.day7(getInput('7'));
 };
 
 const runDays = (daysToRun: string[]) => {
